@@ -1,0 +1,52 @@
+---
+version: '3.3'
+services:
+  hazelcast-instance:
+    image: hazelcast/hazelcast
+    volumes: 
+    - ./resources:/configFolder
+    environment:
+    - JAVA_OPTS=-Dhazelcast.config=/configFolder/hazelcast.xml -Dhazelcast.mancenter.url=http://mancenter:8080/hazelcast-mancenter -Dgroup.name=hz-compose -Dgroup.password=s3crEt 
+    links:
+    - "hazelcast-management:mancenter"
+    ports:
+      - 5701:5701
+      
+
+  hazelcast-management:
+    image: hazelcast/management-center
+    volumes:
+      - ./data:/mancenter-3.8
+    environment:
+      - MANCENTER_DATA=/mancenter-3.8
+      - JAVA_OPTS=-Dhazelcast.mc.rest.enabled=true
+    ports:
+      - 8085:8080
+      - 8086:8081
+      - 8486:8443
+
+
+  passenger-db:
+    image: mysql:5.7.22
+    container_name: passenger-mysql
+    ports:
+      - "3319:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_USER: demo 
+      MYSQL_PASSWORD: demo 
+      MYSQL_DATABASE: passenger 
+
+
+  passenger-zookeeper:
+    image: zookeeper
+    restart: always
+    hostname: passenger-zookeeper 
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 
+
+
+...

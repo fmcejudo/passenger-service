@@ -1,0 +1,7 @@
+==OVERVIEW
+
+This project shows an example of implementation of leader election for each of the services from which Spring integration
+has support.
+
+As one of the examples is with `hazelcast`, it takes as storage for our entities the same hazelcast instance.
+

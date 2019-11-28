@@ -1,6 +1,7 @@
 package com.ryanair.passenger.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.integration.zookeeper.leader.LeaderInitiator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -12,12 +13,22 @@ public class PassengerScheduler {
 
     private final PassengerService passengerService;
 
-    public PassengerScheduler(final PassengerService passengerService) {
+    private final LeaderInitiator leaderInitiator;
+
+    public PassengerScheduler(final PassengerService passengerService,
+                              final LeaderInitiator leaderInitiator) {
         this.passengerService = passengerService;
+        this.leaderInitiator = leaderInitiator;
     }
 
     @Scheduled(fixedRate = 20_000L)
     public void execute() {
+
+        if (!leaderInitiator.getContext().isLeader()) {
+            log.info("I am not the leader...");
+            return;
+        }
+
         passengerService.findAll().stream()
                 .collect(Collectors.groupingBy(p -> String.join("/", p.getFrom(), p.getTo()).toUpperCase()))
                 .forEach((key, value) -> log.info(

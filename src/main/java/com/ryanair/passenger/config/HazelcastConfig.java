@@ -9,6 +9,8 @@ import org.springframework.boot.autoconfigure.hazelcast.HazelcastClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.hazelcast.repository.config.EnableHazelcastRepositories;
+import org.springframework.integration.hazelcast.leader.LeaderInitiator;
+import org.springframework.integration.leader.DefaultCandidate;
 
 @Configuration
 @EnableHazelcastRepositories(basePackageClasses = PassengerRepository.class)
@@ -31,5 +33,10 @@ public class HazelcastConfig {
     @Bean
     HazelcastInstance hazelcastInstance(final ClientConfig clientConfig) {
         return new HazelcastClientFactory(clientConfig).getHazelcastInstance();
+    }
+
+    @Bean
+    LeaderInitiator leaderInitiator(final HazelcastInstance hazelcastInstance) {
+        return new LeaderInitiator(hazelcastInstance, new DefaultCandidate());
     }
 }
